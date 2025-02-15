@@ -1,30 +1,63 @@
 import re
-from urllib.parse import urlparse
+from bs4 import BeautifulSoup
+from urllib.parse import urlparse, urljoin, urldefrag
+
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 def scraper(url, resp):
+    if not resp.raw_response or not resp.raw_response.content:
+        logging.warning(f"No content at {url}")
+        return []
+    logging.info(f"Scraping {url}")
     links = extract_next_links(url, resp)
-    return [link for link in links if is_valid(link)]
+    logging.info(f"Found {len(links)} links at {url}")
+
 
 def extract_next_links(url, resp):
-    # Implementation required.
-    # url: the URL that was used to get the page
-    # resp.url: the actual url of the page
-    # resp.status: the status code returned by the server. 200 is OK, you got the page. Other numbers mean that there was some kind of problem.
-    # resp.error: when status is not 200, you can check the error here, if needed.
-    # resp.raw_response: this is where the page actually is. More specifically, the raw_response has two parts:
-    #         resp.raw_response.url: the url, again
-    #         resp.raw_response.content: the content of the page!
-    # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-    return list()
+    if resp.status != 200 or not resp.raw_response:
+        logging.error(f"Error encountered for {url}: {resp.status}")
+        return []
+
+    try:
+        html_content = resp.raw_response.content.decode("utf-8", errors="ignore")
+        soup = BeautifulSoup(html_content, "html.parser")
+    except Exception as e:
+        logging.error(f"Failed to parse HTML for {url}: {e}")
+        return []
+
+    # Determine the base URL for resolving relative links
+    base_tag = soup.find("base", href=True)
+    if base_tag:
+        base_url = base_tag["href"]
+    else:
+        base_url = url
+
+    links = set()
+    for tag in soup.find_all("a", href=True):
+        try:
+            absolute_url = absolute_url.encode("ascii").decode("ascii")  # Ensure ASCII
+            links.add(absolute_url)
+        except UnicodeEncodeError:
+            continue
+
+    logging.info(f"Extracted {len(links)} raw links from {url}")
+    return sorted(links)
+
 
 def is_valid(url):
-    # Decide whether to crawl this url or not. 
-    # If you decide to crawl it, return True; otherwise return False.
-    # There are already some conditions that return False.
     try:
         parsed = urlparse(url)
-        if parsed.scheme not in set(["http", "https"]):
+
+        if parsed.scheme not in {"http", "https"}:
             return False
+
+        allowed_domains = {".ics.uci.edu", ".cs.uci.edu", ".informatics.uci.edu", ".stat.uci.edu"}
+        if not any(parsed.netloc == domain or parsed.netloc.endswith(domain) for domain in allowed_domains):
+            return False
+
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
@@ -36,5 +69,5 @@ def is_valid(url):
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
 
     except TypeError:
-        print ("TypeError for ", parsed)
+        print("TypeError for ", url)
         raise
