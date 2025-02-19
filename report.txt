@@ -1,0 +1,56 @@
+Total Unique Pages: 15
+Longest Page: http://www.stat.uci.edu/wp-content/uploads/LorinCrawfordAbstract5-2-19 with 19322 words
+
+Top 50 Most Common Words:
+s: 1999
+w: 1955
+o: 1911
+e: 1896
+m: 1884
+y: 1867
+g: 1850
+r: 1844
+h: 1819
+b: 1814
+u: 1814
+q: 1790
+x: 1789
+f: 1788
+c: 1788
+n: 1783
+v: 1770
+l: 1764
+p: 1755
+j: 1753
+d: 1750
+z: 1742
+k: 1729
+t: 1716
+0: 1053
+9: 971
+4: 941
+6: 938
+1: 938
+5: 924
+3: 917
+7: 897
+8: 872
+2: 864
+abstract: 146
+statistics: 114
+university: 100
+obj: 94
+endobj: 94
+stream: 90
+endstream: 82
+seminar: 71
+department: 65
+data: 60
+2011: 49
+series: 46
+bren: 44
+uci: 41
+2014: 40
+h4: 36
+
+Subdomains in ics.uci.edu:

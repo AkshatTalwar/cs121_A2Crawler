@@ -235,4 +235,3 @@ def load_log():
 
     except Exception as e:
         print(f"Error loading log file: {e}")
-
