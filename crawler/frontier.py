@@ -4,15 +4,17 @@ import shelve
 from threading import Thread, RLock
 from queue import Queue, Empty
 
+from future.backports.urllib.parse import urldefrag
 from utils import get_logger, get_urlhash, normalize
 from scraper import is_valid
+
 
 class Frontier(object):
     def __init__(self, config, restart):
         self.logger = get_logger("FRONTIER")
         self.config = config
         self.to_be_downloaded = list()
-        
+
         if not os.path.exists(self.config.save_file) and not restart:
             # Save file does not exist, but request to load save.
             self.logger.info(
@@ -54,13 +56,15 @@ class Frontier(object):
             return None
 
     def add_url(self, url):
+        url, _ = urldefrag(url)  ## added to make sure no # are added to frontier
         url = normalize(url)
         urlhash = get_urlhash(url)
         if urlhash not in self.save:
             self.save[urlhash] = (url, False)
+
             self.save.sync()
             self.to_be_downloaded.append(url)
-    
+
     def mark_url_complete(self, url):
         urlhash = get_urlhash(url)
         if urlhash not in self.save:
