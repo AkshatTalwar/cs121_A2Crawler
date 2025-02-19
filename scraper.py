@@ -35,6 +35,7 @@ def is_valid(url):
         ]
         if not any(parsed.netloc.endswith(domain) for domain in allowed_domains):
             return False
+
         if re.match(
                 r".*\.(css|js|bmp|gif|jpg|jpeg|png|pdf|ico"
                 + r"|tiff?|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|m4v|mkv|ogg|ogv"
