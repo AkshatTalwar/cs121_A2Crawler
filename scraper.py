@@ -6,6 +6,8 @@ def scraper(url, resp):
     return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
+    if resp.status != 200 or resp.raw_response is None:
+        return []
     # Implementation required.
     # url: the URL that was used to get the page
     # resp.url: the actual url of the page
@@ -44,6 +46,7 @@ def is_valid(url):
                 + r"|epub|dll|cnf|tgz|sha1|thmx|mso|arff|rtf|jar|csv"
                 + r"|rm|smil|wmv|swf|wma|zip|rar|gz|ical|ppsx|pps|mol)$",
                 parsed.path.lower()):
+            # we added more extensions we learned from ed and trials
             return False
 
     except TypeError:
