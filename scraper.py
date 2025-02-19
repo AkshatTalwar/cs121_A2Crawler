@@ -1,5 +1,8 @@
 import re
 from urllib.parse import urlparse
+MIN_WORD_COUNT = 50
+MAX_PAGE_SIZE = 1 * 1024 * 1024  # 1MB in size
+
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -8,6 +11,11 @@ def scraper(url, resp):
 def extract_next_links(url, resp):
     if resp.status != 200 or resp.raw_response is None:
         return []
+
+    if len(resp.raw_response.content) > MAX_PAGE_SIZE:
+        print(f"Skipping large file (>1MB): {url}")
+        return []
+
     # Implementation required.
     # url: the URL that was used to get the page
     # resp.url: the actual url of the page
