@@ -1,9 +1,12 @@
 import re
-from collections import deque
-from urllib.parse import urlparse
-from simhash_basic import make_simhash, simhash_diff
-from tokenizer import tokenize, compute_word_frequencies, print_frequencies
+import json
+import urllib.robotparser
+from urllib.parse import urljoin, urlparse, urldefrag
 from bs4 import BeautifulSoup
+from tokenizer import tokenize
+from collections import deque
+from simhash_basic import make_simhash, simhash_diff
+import urllib.error
 
 MIN_WORD_COUNT = 50
 MAX_PAGE_SIZE = 1 * 1024 * 1024  # 1MB in size
