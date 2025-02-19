@@ -57,6 +57,16 @@ def is_similar(text):
     return False
 
 def scraper(url, resp):
+    # Implementation required.
+    # url: the URL that was used to get the page
+    # resp.url: the actual url of the page
+    # resp.status: the status code returned by the server. 200 is OK, you got the page. Other numbers mean that there was some kind of problem.
+    # resp.error: when status is not 200, you can check the error here, if needed.
+    # resp.raw_response: this is where the page actually is. More specifically, the raw_response has two parts:
+    #         resp.raw_response.url: the url, again
+    #         resp.raw_response.content: the content of the page!
+    # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
+
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
 
@@ -112,20 +122,34 @@ def extract_next_links(url, resp):
     tokens = [word for word in tokens if word not in STOPWORDS]
     update_word_counts(tokens)
 
-    # 7 . we update our longest page again
+    # 7. we update our longest page again
     if word_count > longest_page[1]:
         longest_page = (url, word_count)
 
-    # Implementation required.
-    # url: the URL that was used to get the page
-    # resp.url: the actual url of the page
-    # resp.status: the status code returned by the server. 200 is OK, you got the page. Other numbers mean that there was some kind of problem.
-    # resp.error: when status is not 200, you can check the error here, if needed.
-    # resp.raw_response: this is where the page actually is. More specifically, the raw_response has two parts:
-    #         resp.raw_response.url: the url, again
-    #         resp.raw_response.content: the content of the page!
-    # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-    return list()
+    # 8 make sure our unique pages are saved in logs
+    track_unique_pages(url)
+
+    # 9. Extract and validate links
+    links = extract_next_links(url, soup)
+    valid_links = [link for link in links if is_valid(link)]
+
+    # 10. Add new valid links to the queue**
+    for link in valid_links:
+        if link not in visited_urls:
+            visited_urls.add(link)
+            url_queue.append(link)
+
+    return valid_links
+
+def extract_next_links(url, soup):
+    # next links in to be extracted from current url/soup
+    links = []
+    for tag in soup.find_all("a", href=True):
+        absolute_url = urljoin(url, tag["href"])
+        absolute_url, _ = urldefrag(absolute_url) # no frag
+        links.append(absolute_url)
+    return links
+
 
 def is_valid(url):
     # Decide whether to crawl this url or not. 
