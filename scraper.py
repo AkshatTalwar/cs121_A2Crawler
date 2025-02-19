@@ -180,7 +180,7 @@ def is_valid(url):
                 parsed.path.lower()):
             # we added more extensions we learned from ed and trials
             return False
-
+        return True
     except TypeError:
         print ("TypeError for ", parsed)
         raise
