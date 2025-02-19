@@ -2,6 +2,8 @@ import re
 from collections import deque
 from urllib.parse import urlparse
 from simhash_basic import make_simhash, simhash_diff
+from tokenizer import tokenize, compute_word_frequencies, print_frequencies
+from bs4 import BeautifulSoup
 
 MIN_WORD_COUNT = 50
 MAX_PAGE_SIZE = 1 * 1024 * 1024  # 1MB in size
@@ -172,3 +174,9 @@ def track_unique_pages(url):
             subdomains[domain] += 1
         else:
             subdomains[domain] = 1
+
+def update_word_counts(tokens):
+   # updates our count of words
+    global word_counts
+    for word in tokens:
+        word_counts[word] = word_counts.get(word, 0) + 1
