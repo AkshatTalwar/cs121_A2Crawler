@@ -158,3 +158,17 @@ def is_valid(url):
     except TypeError:
         print ("TypeError for ", parsed)
         raise
+
+def track_unique_pages(url):
+    #Tracks unique visited pages and subdomains
+    global visited_urls, subdomains
+
+    parsed = urlparse(url)
+    domain = parsed.netloc
+
+    if url not in visited_urls:
+        visited_urls.add(url)
+        if domain in subdomains:
+            subdomains[domain] += 1
+        else:
+            subdomains[domain] = 1
