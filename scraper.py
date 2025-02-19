@@ -90,6 +90,30 @@ def extract_next_links(url, resp):
         print(f"Skipping potential crawler trap: {url}")
         return []
 
+    # 5. Parsing the pages text
+    soup = BeautifulSoup(resp.raw_response.content, "html.parser")
+    text_content = soup.get_text()
+
+    # -> 5.1 Check for duplicate content our (SimHash)
+    if is_similar(text_content):
+        print(f"Skipping duplicate page: {url}")
+        return []
+
+    # -> 5.2 Avoid low-content pages around 50 words
+    word_count = len(text_content.split())
+    if word_count < MIN_WORD_COUNT:
+        print(f"Skipping low-content page (<50 words): {url}")
+        return []
+
+    # 6 . we process i.e. tokens
+    tokens = tokenize(text_content)
+    tokens = [word for word in tokens if word not in STOPWORDS]
+    update_word_counts(tokens)
+
+    # 7 . we update our longest page again
+    if word_count > longest_page[1]:
+        longest_page = (url, word_count)
+
     # Implementation required.
     # url: the URL that was used to get the page
     # resp.url: the actual url of the page
