@@ -1,6 +1,7 @@
 import re
 from collections import deque
 from urllib.parse import urlparse
+from simhash_basic import make_simhash, simhash_diff
 
 MIN_WORD_COUNT = 50
 MAX_PAGE_SIZE = 1 * 1024 * 1024  # 1MB in size
@@ -44,6 +45,14 @@ def is_trap(url):
             return True
     return False
 
+def is_similar(text):
+    #Checks if a page is too similar
+    page_hash = make_simhash(text)
+    for old_hash in visited_hashes:
+        if simhash_diff(page_hash, old_hash) < 5:  # Adjust threshold as needed
+            return True  # Too similar, skip
+    visited_hashes.add(page_hash)
+    return False
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
