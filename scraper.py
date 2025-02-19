@@ -67,10 +67,6 @@ def scraper(url, resp):
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
 
-    links = extract_next_links(url, resp)
-    return [link for link in links if is_valid(link)]
-
-def extract_next_links(url, resp):
     global longest_page # longest page
 
     # 1.to deal with weird 600 codes
@@ -139,6 +135,8 @@ def extract_next_links(url, resp):
             visited_urls.add(link)
             url_queue.append(link)
 
+    # 11. needs our log function!
+    save_log() # saves progress
     return valid_links
 
 def extract_next_links(url, soup):
@@ -204,3 +202,34 @@ def update_word_counts(tokens):
     global word_counts
     for word in tokens:
         word_counts[word] = word_counts.get(word, 0) + 1
+
+
+def save_log():
+    """Saves to our log.json."""
+    log_data = {
+        "visited_urls": list(visited_urls),
+        "word_counts": word_counts,
+        "subdomains": subdomains,
+        "longest_page": longest_page
+    }
+    with open(LOG_FILE, "w") as file:
+        json.dump(log_data, file)
+
+def load_log():
+    """Loads from the previous crawl's .json."""
+    global visited_urls, word_counts, subdomains, longest_page
+    try:
+        with open(LOG_FILE, "r") as file:
+            log_data = json.load(file)
+            visited_urls = set(log_data["visited_urls"])
+            word_counts.update(log_data["word_counts"])
+            subdomains.update(log_data["subdomains"])
+            longest_page = tuple(log_data["longest_page"])
+            print("Previous crawl state loaded.")
+
+    except FileNotFoundError:
+        print("No previous log file found. Starting fresh crawl.")
+
+    except Exception as e:
+        print(f"Error loading log file: {e}")
+
