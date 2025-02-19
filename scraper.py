@@ -13,7 +13,36 @@ longest_page = (None, 0)  # (URL, word count)
 url_queue = deque()
 STOPWORDS = set("""
 a about above after again against all am an and any are aren't as at be because been before being below between both but by can't cannot could couldn't did didn't do does doesn't doing don't down during each few for from further had hadn't has hasn't have haven't having he he'd he'll he's her here here's hers herself him himself his how how's i i'd i'll i'm i've if in into is isn't it it's its itself let's me more most mustn't my myself no nor not of off on once only or other ought our ours ourselves out over own same shan't she she'd she'll she's should shouldn't so some such than that that's the their theirs them themselves then there there's these they they'd they'll they're they've this those through to too under until up very was wasn't we we'd we'll we're we've were weren't what what's when when's where where's which while who who's whom why why's with won't would wouldn't you you'd you'll you're you've your yours yourself yourselves""".split())
+TRAP_PATTERNS = [
+    r'\?sort=', r'\?order=', r'\?page=\d+',  # URLs
+    r'\?date=', r'\?filter=', r'calendar', r'\?view=', r'\?session=', # calender
+    r'\?print=', r'\?lang=', r'\?mode=', r'\?year=\d{4}', r'\?month=\d{1,2}', r'\?day=\d{1,2}',
+    r'\?tribe-bar-date=', r'outlook-ical=',  #  infinite event/calendar URLs
+    r'\.ical$', r'\.ics$',  # Blocks iCalendar/ICS downloads
+    r'doku\.php',  # Blocks all doku.php pages , worst!!! trap
+    r'\?do=media', r'\?tab_details=', r'\?tab_files=',
+    r'\?rev=\d+',
+    r'&do=diff',
+    r'&do=edit',
+    r'&printable=yes',
+    r'\?share=',
+    r'\?replytocom=',
+    r'\?fbclid=', r'utm_',  # analytics from fb and some gooogle
+    r'\?redirect=',  # auto-redirects that could loop infinitely
+    r'\?attachment_id=',  # media
+]
 
+def is_trap(url):
+    """Detects common crawler traps based on URL patterns."""
+    parsed = urlparse(url)
+    # somehow came in even when we removed from traps
+    if "doku.php" in parsed.path:
+        return True
+    # patterns
+    for i in TRAP_PATTERNS:
+        if re.search(i, url):
+            return True
+    return False
 
 
 def scraper(url, resp):
@@ -23,11 +52,12 @@ def scraper(url, resp):
 def extract_next_links(url, resp):
     global longest_page # longest page
 
-    if 600 <= resp.status < 700: # 1.to deal with weird 600 codes
+    # 1.to deal with weird 600 codes
+    if 600 <= resp.status < 700:
         print(f"Skipping URL due to unknown 601 error (status {resp.status}): {url}")
         return []
 
-    #2. redirects from 300s
+    # 2. redirects from 300s
     if 300 <= resp.status <= 399:
         new_url = resp.raw_response.headers.get("Location")
         if new_url:
@@ -37,11 +67,18 @@ def extract_next_links(url, resp):
             print(f"Skipping redirect : {url}") # couldnt find so left
             return []
 
-    if resp.status != 200 or resp.raw_response is None: # 2. response status is 200
+    # 2. response status is 300
+    if resp.status != 200 or resp.raw_response is None:
         return []
 
-    if len(resp.raw_response.content) > MAX_PAGE_SIZE:# 3. Too long of a page
+    # 3. Too long of a page
+    if len(resp.raw_response.content) > MAX_PAGE_SIZE:
         print(f"Skipping large file (>1MB): {url}")
+        return []
+
+    # 4. is a trap ????
+    if is_trap(url):
+        print(f"Skipping potential crawler trap: {url}")
         return []
 
     # Implementation required.
