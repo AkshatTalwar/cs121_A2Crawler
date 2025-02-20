@@ -1,3 +1,4 @@
+
 import re
 import json
 from urllib.parse import urljoin, urlparse, urldefrag
@@ -117,7 +118,6 @@ def scraper(url, resp):
 
     # 6 . we process i.e. tokens
     tokens = tokenize(text_content)
-    tokens = [word for word in tokens if word not in STOPWORDS]
     update_word_counts(tokens)
 
     # 7. we update our longest page again
