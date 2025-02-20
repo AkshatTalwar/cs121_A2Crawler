@@ -5,6 +5,12 @@ from utils import get_logger
 import scraper
 import time
 
+# To enable multithreading, ensure multiple Worker threads run in parallel.
+# start multiple Worker instances based on THREADCOUNT.
+# useD Rlock
+# make sure add_url() and get_tbd_url() handle concurrency properly.
+# each worker should fetch, process, and mark URLs independently.
+# use join() in crawler.py to finish
 
 class Worker(Thread):
     def __init__(self, worker_id, config, frontier):

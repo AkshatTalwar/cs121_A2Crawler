@@ -8,12 +8,13 @@ from future.backports.urllib.parse import urldefrag
 from utils import get_logger, get_urlhash, normalize
 from scraper import is_valid
 
-
+# Added RLock() for thread safety
 class Frontier(object):
     def __init__(self, config, restart):
         self.logger = get_logger("FRONTIER")
         self.config = config
         self.to_be_downloaded = list()
+        #self.lock = RLock() # for multithreading
 
         if not os.path.exists(self.config.save_file) and not restart:
             # Save file does not exist, but request to load save.
