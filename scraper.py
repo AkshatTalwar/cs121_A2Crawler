@@ -1,6 +1,20 @@
-#all TA's given access
+# create and initialise the project: Akshat
+# tokenise updated from A1 by: Sanaa
+# Traps detection: Suyash and Akshat
+# Simhash learned via net and modified version via Akshat
+# Validity of our domains tht crawler went to : Arsheaa
+# scrapers error code handling : Suyash
+# combining scraper with functions everyone
+# tracking unique pages and sending tokeniser is working via Sanaa
+# Log saver and loader via saving to json: Suyash
+# Defragging the links and making sure we don't go to fragments in our Crawl
+# Rebasing and stashing via everyone
+# robots.txt implemented by suyash and arsheaa but removed coz not reading too many pages
+
 import re
 import json
+# import urllib.robotparser
+# from urllib.parse import urlparse
 from urllib.parse import urljoin, urlparse, urldefrag
 from bs4 import BeautifulSoup
 from tokenizer import tokenize
@@ -37,6 +51,28 @@ TRAP_PATTERNS = [
     r'\?redirect=',  # auto-redirects that could loop infinitely
     r'\?attachment_id=',  # media
 ]
+# robots_parsers = {}
+# Robots.txt sometimes stop our program from going to desired pages causing 0 crawls issue so rn commented
+# Dictionary to store parsed robots.txt per domain
+# robots_parsers = {}
+# def can_fetch(url):
+#     """Checks if the URL is allowed by robots.txt"""
+#     # the format learned from stacko.flow
+#     parsed = urlparse(url)
+#     domain = f"{parsed.scheme}://{parsed.netloc}/robots.txt"
+#     # Load txt
+#     if domain not in robots_parsers:
+#         rp = urllib.robotparser.RobotFileParser()
+#         rp.set_url(domain)
+#         try:
+#             rp.read()  # read robots.txt
+#             robots_parsers[domain] = rp
+#         except Exception as e:
+#             print(f"couldn't find robots.txt")
+#             return True # continue crawl
+#
+#     # so now we have checked
+#     return robots_parsers[domain].can_fetch("*", url)
 
 def is_trap(url):
     """Detects common crawler traps based on URL patterns."""
@@ -118,7 +154,6 @@ def scraper(url, resp):
 
     # 6 . we process i.e. tokens
     tokens = tokenize(text_content)
-    tokens = [word for word in tokens if word not in STOPWORDS]
     update_word_counts(tokens)
 
     # 7. we update our longest page again
