@@ -1,3 +1,4 @@
+#all TA's given access
 import re
 import json
 from urllib.parse import urljoin, urlparse, urldefrag
